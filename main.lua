@@ -69,24 +69,25 @@ function M.run()
 	local last_online = nil
 
 	local t
-	t = uloop.timer(function()
-		local online = has_internet()
-		if online == nil then
-			t:set(5 * 1000)
-			return
-		end
-
-		if last_online ~= nil and online ~= last_online then
-			if not online then
-				conn:send("internet.lost", { online = false })
-			else
-				conn:send("internet.restored", { online = true })
+	t = uloop.timer(
+		function()
+			local online = has_internet()
+			if online == nil then
+				t:set(5 * 1000)
+				return
 			end
-		end
 
-		last_online = online
-		t:set(5 * 1000)
-	end)
+			if last_online ~= nil and online ~= last_online then
+				if not online then
+					conn:send("internet.lost", { online = false })
+				else
+					conn:send("internet.restored", { online = true })
+				end
+			end
+
+			last_online = online
+			t:set(5 * 1000)
+		end)
 
 	t:set(5 * 1000)
 	uloop.run()
