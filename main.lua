@@ -1,27 +1,22 @@
-local socket = require("socket")
 local ubus = require("ubus")
 local uloop = require("uloop")
-
-local HOST = "8.8.8.8"
-local PORT = 53
 
 local M = {}
 
 local function has_internet()
-	local tcp = socket.tcp()
-	if not tcp then
-		return nil, "Could not create tcp socket"
+	local handle = io.popen(
+		"ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; echo $?"
+	)
+	if not handle then
+		return nil, "Could not execute ping command"
 	end
 
-	tcp:settimeout(5)
+	local rc = handle:read("*a")
+	handle:close()
 
-	local ok = tcp:connect(HOST, PORT)
-	if not ok then
-		tcp:close()
-		return false, "Could not connect to host"
-	end
+	rc = tonumber(rc)
 
-	return true
+	return rc == 0
 end
 
 function M.create_service(conn)
@@ -42,8 +37,6 @@ function M.create_service(conn)
 					local result = {
 						success = true,
 						status = status,
-						host = HOST,
-						port = PORT
 					}
 					conn:reply(req, result)
 				end,
