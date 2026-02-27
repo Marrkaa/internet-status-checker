@@ -19,7 +19,12 @@ local function has_internet()
 
 	rc = tonumber(rc)
 
-	return rc == 0
+	if rc == 0 then
+		return true, "connected"
+
+	else
+		return false, "disconnected"
+	end
 end
 
 function M.create_service(conn)
@@ -27,19 +32,16 @@ function M.create_service(conn)
 		["internet"] = {
 			status = {
 				function(req)
-					local status, err = has_internet()
-
+					local status, msg = has_internet()
 					if status == nil then
 						conn:reply(req, {
-							success = false,
-							error = err or "Failed to get internet status"
+							error = msg or "Failed to get internet status"
 						})
 						return
 					end
-
+					
 					local result = {
-						success = true,
-						status = status,
+						status = msg
 					}
 					conn:reply(req, result)
 				end,
@@ -74,10 +76,10 @@ function M.run()
 			end
 
 			if last_online ~= nil and online ~= last_online then
-				if not online then
-					conn:send("internet.lost", { online = false })
+				if online == true then
+					conn:send("internet.status", { internet = "connected" })
 				else
-					conn:send("internet.restored", { online = true })
+					conn:send("internet.status", { internet = "disconnected" })
 				end
 			end
 
