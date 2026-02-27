@@ -29,7 +29,7 @@ function M.create_service(conn)
 				function(req)
 					local status, err = has_internet()
 
-					if not status then
+					if status == nil then
 						conn:reply(req, {
 							success = false,
 							error = err or "Failed to get internet status"
