@@ -1,3 +1,6 @@
+package.path = "/home/studentas/.vscode/extensions/yinfei.luahelper-0.2.29/debugger/?.lua;" .. package.path
+require("LuaPanda").start("127.0.0.1", 8818)
+
 local ubus = require("ubus")
 local uloop = require("uloop")
 
